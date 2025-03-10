@@ -88,7 +88,8 @@ class BasketItemViewSet(viewsets.ModelViewSet):
 
             # Проверяем наличие продукта в магазине
             product_response = requests.get(
-                "http://127.0.0.1:8005/api/storeproduct/?product={}&store={}".format(
+                "{}/api/storeproduct/?product={}&store={}".format(
+                   ecommerce,
                     validated_data.get("product_id"),
                     store_id
                 )

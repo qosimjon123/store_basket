@@ -2,6 +2,9 @@ from rest_framework import serializers
 from .models import Basket, BasketItem
 import requests
 
+from .sourcesUrls import ecommerce
+
+
 class BasketSerializer(serializers.ModelSerializer):
 
 
@@ -24,8 +27,9 @@ class BasketItemSerializer(serializers.ModelSerializer):
 
     def get_total_price(self, obj):
         cart_store = obj.cart.store_id  # Используем правильную связь через `cart`
-        price_url = "http://127.0.0.1:8005/api/price/?product__id={}&store__id={}" \
+        price_url = "{}/api/price/?product__id={}&store__id={}" \
             .format(
+            ecommerce,
             obj.product_id,
             cart_store  # Исправлено: передаем правильный store_id
         )
