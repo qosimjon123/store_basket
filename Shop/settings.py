@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-rkuz=$6&%jcrahab^_4evxz5m_srm#ls6%(&k6kd3j+4u@p9=4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -82,14 +82,14 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'Basket',
-        'USER': 'kali',
+        'USER': 'root',
         'PASSWORD': 'kali',
-        'HOST': '127.0.0.1',
+        'HOST': 'mysql-container',
         'PORT': '3306',
     }
 }
 
-INTERNAL_IPS = ['127.0.0.1']
+INTERNAL_IPS = ['*']
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

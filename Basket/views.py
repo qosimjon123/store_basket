@@ -6,9 +6,9 @@ from rest_framework.generics import get_object_or_404
 import requests
 from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
-
 from Basket.models import Basket, BasketItem
 from .serializers import BasketSerializer, BasketItemSerializer
+from .sourcesUrls import customer, ecommerce
 
 
 class BasketViewSet(viewsets.ModelViewSet):
@@ -27,13 +27,13 @@ class BasketViewSet(viewsets.ModelViewSet):
         try:
 
             customer_response = requests.get(
-                "http://127.0.0.1:8002/customer/{}".format(validated_data.get("customer_id")))
+                "{}/customer/{}".format(customer,validated_data.get("customer_id")))
             if customer_response.status_code != 200:
                 raise ValidationError(
                     {"customer": "Customer was not found or blocked"},
                 )
 
-            store_response = requests.get('http://127.0.0.1:8005/api/store/{}'.format(validated_data.get("store_id")))
+            store_response = requests.get('{}/api/store/{}'.format(ecommerce,validated_data.get("store_id")))
             if store_response.status_code != 200:
                 raise ValidationError(
                     {"store": "Магазин не найден"},
