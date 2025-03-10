@@ -84,7 +84,7 @@ DATABASES = {
         'NAME': 'Basket',
         'USER': 'root',
         'PASSWORD': 'kali',
-        'HOST': 'mysql-container',
+        'HOST': 'mysql-container',git
         'PORT': '3306',
     }
 }
