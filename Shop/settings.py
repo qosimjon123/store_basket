@@ -84,12 +84,12 @@ DATABASES = {
         'NAME': 'Basket',
         'USER': 'root',
         'PASSWORD': 'kali',
-        'HOST': 'mysql-container',git
+        'HOST': 'mysql-container',
         'PORT': '3306',
     }
 }
 
-INTERNAL_IPS = ['*']
+INTERNAL_IPS = ['127.0.0.1']
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
