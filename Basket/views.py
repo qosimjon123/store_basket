@@ -6,7 +6,7 @@ from rest_framework.generics import get_object_or_404
 import requests
 from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
-from Basket.models import Basket, BasketItem
+from .models import Basket, BasketItem
 from .serializers import BasketSerializer, BasketItemSerializer
 from .sourcesUrls import customer, ecommerce
 
@@ -20,10 +20,10 @@ class BasketViewSet(viewsets.ModelViewSet):
         """
         При создании товара в корзине автоматически присваиваем корзину.
         """
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
-        print(request.headers)
         try:
 
             customer_response = requests.get(
@@ -39,9 +39,18 @@ class BasketViewSet(viewsets.ModelViewSet):
                     {"store": "Магазин не найден"},
                 )
 
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            basket, created = Basket.objects.get_or_create(
+                customer_id=validated_data.get("customer_id"),
+                store_id=validated_data.get("store_id")
+            )
+
+            if created:
+                serializer = self.get_serializer(basket)
+                headers = self.get_success_headers(serializer.data)
+                return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            else:
+                serializer = self.get_serializer(basket)
+                return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
@@ -158,6 +167,8 @@ class BasketItemViewSet(viewsets.ModelViewSet):
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": f"Unexpected error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 
 

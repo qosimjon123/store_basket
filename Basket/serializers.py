@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import serializers
 from .models import Basket, BasketItem
 import requests
@@ -31,10 +33,11 @@ class BasketItemSerializer(serializers.ModelSerializer):
             .format(
             ecommerce,
             obj.product_id,
-            cart_store  # Исправлено: передаем правильный store_id
+            cart_store
         )
         response = requests.get(price_url)
-
-        return obj.quantity * response.json()[0].get('price')
+        if not response:
+            return 0
+        return obj.quantity * response.json()
 
 
