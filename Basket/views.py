@@ -1,3 +1,4 @@
+from functools import cached_property
 from django.contrib.sites import requests
 from requests import RequestException
 from rest_framework import viewsets, status
@@ -10,10 +11,24 @@ from .models import Basket, BasketItem
 from .serializers import BasketSerializer, BasketItemSerializer
 from .sourcesUrls import customer, ecommerce
 
+from pprint import pprint
+
+
 
 class BasketViewSet(viewsets.ModelViewSet):
-    queryset = Basket.objects.all()
+
     serializer_class = BasketSerializer
+
+    @cached_property
+    def queryset(self):
+        return Basket.objects.all()
+
+
+
+    def get_queryset(self):
+        return self.queryset
+
+
 
 
     def create(self, request , *args, **kwargs):
@@ -57,25 +72,39 @@ class BasketViewSet(viewsets.ModelViewSet):
 
 
 
-
-
-
-
-
-
 class BasketItemViewSet(viewsets.ModelViewSet):
     serializer_class = BasketItemSerializer
 
+    @cached_property
+    def queryset(self):
+        return BasketItem.objects.select_related('cart').filter(cart__id=self.kwargs["basket_pk"])
+
 
     def get_queryset(self):
-        """
-        Возвращает товары для конкретной корзины (basket).
-        """
-        session_key = self.request.user.pk
-        basket_id = self.kwargs.get('basket_pk')
-        print(basket_id)
-        return BasketItem.objects.filter(cart_id=basket_id)
+        return self.queryset
 
+
+
+    def list(self, request, *args, **kwargs):
+
+        queryset = self.queryset
+        serializer = self.get_serializer(queryset, many=True)
+
+        data = serializer.data
+        if not data:
+            return Response({"error": "Basket not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        total_sum = sum([
+            item['total_item_price']
+            for item in data if isinstance(item['total_item_price'], (int, float))
+        ])
+
+        response_data = {
+            'items': data,
+            'total_sum': total_sum,
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
     def create(self, request, *args, **kwargs):
@@ -85,7 +114,7 @@ class BasketItemViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
-        print(validated_data)
+
         # Получаем id корзины
         basket_id = self.kwargs.get('basket_pk')
 
@@ -97,27 +126,39 @@ class BasketItemViewSet(viewsets.ModelViewSet):
 
             # Проверяем наличие продукта в магазине
             product_response = requests.get(
-                "{}/api/storeproduct/?product={}&store={}".format(
+                "{}/api/storeproduct/has_quantity/?product_id={}&store_id={}".format(
                    ecommerce,
                     validated_data.get("product_id"),
                     store_id
                 )
-            )
+            ).json()
 
 
-            # Если товар не найден или количество товара 0
-            if product_response.status_code != 200:
+            if not product_response:
                 raise ValidationError(
-                    {"store_product": "Product was not found or has empty quantity"}
+                        {"store_product": "Product was not found"}
                 )
+
+
+            product_response = product_response[0].get('quantity', None)
+            print(product_response)
+            if not product_response or product_response == 0:
+                raise ValidationError(
+                    {"store_product": "Product has empty quantity"}
+                )
+
+
+
+
+
 
 
             validated_data['cart'] = basket
             serializer.save()
 
-            # Возвращаем успешный ответ с кодом 201
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 
 
@@ -169,7 +210,24 @@ class BasketItemViewSet(viewsets.ModelViewSet):
             return Response({"error": f"Unexpected error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+    def get_serializer_context(self):
+        queryset = self.get_queryset()
 
+        if not queryset:
+            return {}
 
+        store_id = queryset[0].cart.store_id
+        products_id = [i.product_id for i in queryset]
 
+        price_url = "{}/api/price/bulk/?product_ids={}&store_id={}".format(
+            ecommerce,
+            ','.join(str(item) for item in products_id),
+            store_id
+        )
 
+        try:
+            data = requests.get(price_url).json()
+        except requests.exceptions.RequestException as e:
+            return {"error": "Error fetching price data from external service"}
+
+        return {'price_data': data}

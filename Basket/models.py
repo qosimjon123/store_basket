@@ -15,8 +15,10 @@ class Basket(models.Model):
 
 
 
+
+
 class BasketItem(models.Model):
-    cart = models.ForeignKey(Basket, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Basket, on_delete=models.CASCADE, related_name='items')
     quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
     product_id = models.IntegerField(null=False, blank=False)
 
