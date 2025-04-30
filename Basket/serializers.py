@@ -10,7 +10,7 @@ class BasketItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BasketItem
-        fields = ['id', 'quantity', 'product_id', 'total_item_price']
+        fields = ['id', 'quantity', 'product_id', 'sku', 'total_item_price']
         read_only_fields = ['quantity']
 
     def get_total_item_price(self, obj):
@@ -19,6 +19,7 @@ class BasketItemSerializer(serializers.ModelSerializer):
             return 'Error'
 
         price_data = context.get('price_data', None)
+
 
         if not price_data:
             return 'Price data is missing'
@@ -42,5 +43,5 @@ class BasketSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Basket
-        fields = ['pk', 'customer_id', 'store_id']
+        fields = ['pk', 'session_id', 'store_id']
 
