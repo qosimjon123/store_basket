@@ -10,37 +10,13 @@ RabbitPassword = "password"
 logging.basicConfig(level=logging.INFO)
 
 
-def bulk_create_or_update(data):
-    to_create = [SyncedDataFromProduct(
-        store_id=item['store_id'],
-        product_id=item['product_id'],
-        sku=item['sku'],
-        price=item['price'],
-        discount=item['discount'],
-        quantity=item['quantity'],
-    ) for item in data]
-
-    SyncedDataFromProduct.objects.bulk_create(
-        to_create,
-        update_conflicts=True,
-        update_fields=['price', 'discount', 'quantity', 'sku']
-    )
-
 
 def inactiveTheBasket(basket_id):
 
     Basket.objects.filter(id=basket_id).update(is_active=False)
 
 
-def callback_from_products(ch, method, properties, body):
-    data = json.loads(body)
-    logging.info("Received product data: %r" % data)
-    try:
-        bulk_create_or_update(data)
-        logging.info('Product data successfully processed')
-    except Exception as err:
-        logging.error(f"Error processing product message: {err}")
-    ch.basic_ack(delivery_tag=method.delivery_tag)
+
 
 
 
@@ -72,7 +48,6 @@ def consume_from_rabbitmq(queue, callback):
 
 def start_consumer():
     queues = {
-        'PriceOrQuantityUpdated': callback_from_products,
         'BasketIsOrdered': callback_from_order
     }
 

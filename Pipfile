@@ -8,11 +8,16 @@ django = "*"
 django-debug-toolbar = "*"
 mysqlclient = "*"
 djangorestframework = "*"
-django-filter = "*"
 drf-nested-routers = "*"
 requests = "*"
 pika = "*"
 django-cors-headers = "*"
+django-filter = "*"
+shortuuid = "*"
+rstream = "*"
+channels = "*"
+django-import-export = "*"
+django-stubs = "*"
 
 [dev-packages]
 

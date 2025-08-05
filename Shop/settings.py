@@ -33,6 +33,18 @@ CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 CORS_ALLOW_HEADERS = ['Authorization', 'X-CSRFToken', 'session', 'Content-Type']
 # Application definition
 
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://imprecisely-rightful-earwig.cloudpub.ru',
+    'https://violently-fluttering-bengal.cloudpub.ru',
+    'https://intricately-known-stonefish.cloudpub.ru',
+    'https://murkily-conquering-feline.cloudpub.ru',
+    'https://elegantly-sunny-vizcacha.cloudpub.ru',
+    'https://spatially-amenable-sheepdog.cloudpub.ru',
+    # Добавьте другие домены CloudPub по мере необходимости
+]
+
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -40,11 +52,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-'corsheaders',
+    'corsheaders',
     'debug_toolbar',
     'rest_framework',
     'django_filters',
-    'Basket'
+    'import_export',
+    'Basket',
+    'ProductInfo',
 ]
 
 MIDDLEWARE = [

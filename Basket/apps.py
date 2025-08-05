@@ -8,3 +8,5 @@ class BasketConfig(AppConfig):
     def ready(self):
         from .consumer import start_consumer
         start_consumer()
+
+    

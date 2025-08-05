@@ -6,12 +6,24 @@ from django.db import models
 
 # Create your models here.
 class Basket(models.Model):
+
+    class BasketType(models.TextChoices):
+
+        DELIVERY = 'delivery'
+        PICKUP = 'pickup'
+
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    customer_id = models.IntegerField(null=True, blank=True)
-    session_id = models.UUIDField(null=True, blank=True)
+    customer_id = models.CharField(null=True, blank=True, max_length=50)
+    session_id = models.CharField(null=True, blank=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True) # type: ignore
     store_id = models.PositiveIntegerField(null=False)
+    basket_type = models.CharField(null=True, blank=True, max_length=50)
+    customer_latitude = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=8)
+    customer_longitude = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=8)
+    customer_address = models.TextField(null=True, blank=True)
+
 
 
 

@@ -140,7 +140,9 @@ class BasketItemViewSet(viewsets.ModelViewSet):
 
         response_data = {
             'items': data,
+            'store_id': store_id,
             'total_sum': total_sum,
+
         }
         return Response(response_data, status=status.HTTP_200_OK)
 
